@@ -62,15 +62,15 @@ const SVGCanvas = forwardRef<SVGCanvasHandle, SVGCanvasProps>(
           if (w && h) svg.setAttribute('viewBox', `0 0 ${parseFloat(w)} ${parseFloat(h)}`);
         }
         svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-        // Remove fixed dimensions so it scales to container
+        // Remove fixed dimensions so it scales via viewBox
         svg.removeAttribute('width');
         svg.removeAttribute('height');
-        svg.style.display = 'block';
-        svg.style.maxWidth = '100%';
-        svg.style.maxHeight = '100%';
+        // Absolute center within flex container
+        svg.style.position = 'absolute';
+        svg.style.inset = '0';
         svg.style.width = '100%';
         svg.style.height = '100%';
-        svg.style.margin = '0 auto';
+        svg.style.display = 'block';
       }
 
       // Store original fill colors
@@ -116,7 +116,7 @@ const SVGCanvas = forwardRef<SVGCanvasHandle, SVGCanvasProps>(
     return (
       <div
         ref={containerRef}
-        className="w-full h-full flex items-center justify-center overflow-hidden"
+        className="w-full h-full relative overflow-hidden"
         aria-label="Área de pintura SVG"
       />
     );

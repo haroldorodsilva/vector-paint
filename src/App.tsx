@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { Screen, Drawing } from './lib/types';
+import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import type { Drawing } from './lib/types';
 import { useStorage } from './lib/storage';
 import {
   ensureDefaultCategory,
@@ -35,8 +35,7 @@ export default function App() {
   const categories = ensureDefaultCategory(rawCategories);
   const allDrawings = getAllDrawings(userDrawings);
 
-  const [screen, setScreen] = useState<Screen>('gallery');
-  const [selectedDrawing, setSelectedDrawing] = useState<Drawing | null>(null);
+  const navigate = useNavigate();
 
   // --- Category CRUD ---
   function handleCreateCategory(name: string, emoji: string) {
@@ -58,7 +57,7 @@ export default function App() {
   // --- Drawing CRUD ---
   function handleAddDrawing(name: string, categoryId: string, svgContent: string) {
     saveDrawings(addDrawing(userDrawings, name, categoryId, svgContent));
-    setScreen('gallery');
+    navigate('/');
   }
 
   function handleUpdateDrawing(id: string, name: string, categoryId: string) {
@@ -71,13 +70,7 @@ export default function App() {
 
   // --- Navigation ---
   function handleSelectDrawing(drawing: Drawing) {
-    setSelectedDrawing(drawing);
-    setScreen('painting');
-  }
-
-  function handleBackToGallery() {
-    setSelectedDrawing(null);
-    setScreen('gallery');
+    navigate(`/pintar/${drawing.id}`);
   }
 
   return (
@@ -91,42 +84,82 @@ export default function App() {
         </div>
       )}
 
-      {screen === 'gallery' && (
-        <DrawingGallery
-          categories={categories}
-          drawings={allDrawings}
-          onSelectDrawing={handleSelectDrawing}
-          onGoToCategories={() => setScreen('categories')}
-          onGoToUpload={() => setScreen('upload')}
-          onDeleteDrawing={handleDeleteDrawing}
-          onUpdateDrawing={handleUpdateDrawing}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <DrawingGallery
+              categories={categories}
+              drawings={allDrawings}
+              onSelectDrawing={handleSelectDrawing}
+              onGoToCategories={() => navigate('/categorias')}
+              onGoToUpload={() => navigate('/upload')}
+              onDeleteDrawing={handleDeleteDrawing}
+              onUpdateDrawing={handleUpdateDrawing}
+            />
+          }
         />
-      )}
-
-      {screen === 'painting' && selectedDrawing && (
-        <PaintingScreen
-          drawing={selectedDrawing}
-          onBack={handleBackToGallery}
+        <Route
+          path="/pintar/:drawingId"
+          element={
+            <PaintingRoute
+              drawings={allDrawings}
+              onBack={() => navigate('/')}
+            />
+          }
         />
-      )}
-
-      {screen === 'categories' && (
-        <CategoryManager
-          categories={categories}
-          onCreateCategory={handleCreateCategory}
-          onUpdateCategory={handleUpdateCategory}
-          onDeleteCategory={handleDeleteCategory}
-          onBack={() => setScreen('gallery')}
+        <Route
+          path="/categorias"
+          element={
+            <CategoryManager
+              categories={categories}
+              onCreateCategory={handleCreateCategory}
+              onUpdateCategory={handleUpdateCategory}
+              onDeleteCategory={handleDeleteCategory}
+              onBack={() => navigate('/')}
+            />
+          }
         />
-      )}
-
-      {screen === 'upload' && (
-        <SVGUploader
-          categories={categories}
-          onUpload={handleAddDrawing}
-          onBack={() => setScreen('gallery')}
+        <Route
+          path="/upload"
+          element={
+            <SVGUploader
+              categories={categories}
+              onUpload={handleAddDrawing}
+              onBack={() => navigate('/')}
+            />
+          }
         />
-      )}
+      </Routes>
     </>
   );
+}
+
+/** Resolves drawingId from URL params and renders PaintingScreen */
+function PaintingRoute({
+  drawings,
+  onBack,
+}: {
+  drawings: Drawing[];
+  onBack: () => void;
+}) {
+  const { drawingId } = useParams<{ drawingId: string }>();
+  const drawing = drawings.find((d) => d.id === drawingId);
+
+  if (!drawing) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-purple-50 to-blue-50 gap-4">
+        <p className="text-lg font-bold text-gray-500">Desenho não encontrado</p>
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-bold rounded-xl cursor-pointer transition-colors"
+        >
+          Voltar para galeria
+        </button>
+      </div>
+    );
+  }
+
+  return <PaintingScreen drawing={drawing} onBack={onBack} />;
 }
