@@ -8,6 +8,7 @@ export interface ZoomPanState {
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 5;
+const ZOOM_STEP = 0.5;
 
 export function useZoomPan() {
   const [transform, setTransform] = useState<ZoomPanState>({ scale: 1, x: 0, y: 0 });
@@ -61,23 +62,39 @@ export function useZoomPan() {
 
   const onTouchEnd = useCallback(() => {
     isPinchingRef.current = false;
-    // Snap back if scale is ~1
     const s = stateRef.current;
     if (s.scale <= 1.05) {
       setTransform({ scale: 1, x: 0, y: 0 });
     }
   }, []);
 
+  const zoomIn = useCallback(() => {
+    setTransform((prev) => {
+      const scale = Math.min(MAX_SCALE, prev.scale + ZOOM_STEP);
+      return { ...prev, scale };
+    });
+  }, []);
+
+  const zoomOut = useCallback(() => {
+    setTransform((prev) => {
+      const scale = Math.max(MIN_SCALE, prev.scale - ZOOM_STEP);
+      if (scale <= 1.05) return { scale: 1, x: 0, y: 0 };
+      return { ...prev, scale };
+    });
+  }, []);
+
   const resetZoom = useCallback(() => {
     setTransform({ scale: 1, x: 0, y: 0 });
   }, []);
 
-  const isPinching = isPinchingRef;
-
   return {
     transform,
-    isPinching,
+    isPinching: isPinchingRef,
+    zoomIn,
+    zoomOut,
     resetZoom,
+    canZoomIn: transform.scale < MAX_SCALE,
+    canZoomOut: transform.scale > MIN_SCALE,
     handlers: {
       onTouchStart,
       onTouchMove,

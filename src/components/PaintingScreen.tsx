@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { ArrowLeft, ZoomIn, RotateCcw } from 'lucide-react';
+import { ArrowLeft, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import type { PaintingScreenProps, PaintTool } from '../lib/types';
 import { useUndoRedo } from '../lib/useUndoRedo';
 import { useZoomPan } from '../lib/useZoomPan';
@@ -18,7 +18,10 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
   const [brushSize, setBrushSize] = useState(5);
 
   const { execute, undo, canUndo } = useUndoRedo();
-  const { transform, resetZoom, handlers: zoomHandlers } = useZoomPan();
+  const {
+    transform, zoomIn, zoomOut, resetZoom,
+    canZoomIn, canZoomOut, handlers: zoomHandlers,
+  } = useZoomPan();
 
   const svgCanvasRef = useRef<SVGCanvasHandle>(null);
   const canvasOverlayRef = useRef<CanvasOverlayHandle>(null);
@@ -42,6 +45,7 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
 
   const cursorStyle = buildCursor(activeColor);
   const isZoomed = transform.scale > 1.05;
+  const zoomPercent = Math.round(transform.scale * 100);
 
   const toolbarProps = {
     activeTool,
@@ -67,6 +71,10 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
     </>
   );
 
+  const zoomBtnClass = `w-9 h-9 flex items-center justify-center rounded-xl
+    bg-white/90 hover:bg-white text-gray-700 shadow-md backdrop-blur
+    transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed`;
+
   return (
     <div className="h-[100dvh] flex flex-col bg-gradient-to-b from-purple-50 to-blue-50 overflow-hidden">
       {/* Header */}
@@ -83,19 +91,7 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
         <h1 className="text-sm font-bold text-purple-700 truncate flex-1">
           {drawing.name}
         </h1>
-        {/* Zoom indicator — only on touch devices when zoomed */}
-        {isZoomed && (
-          <button
-            type="button"
-            onClick={resetZoom}
-            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-purple-100 text-purple-700
-              text-xs font-bold cursor-pointer hover:bg-purple-200 transition-colors"
-            aria-label="Resetar zoom"
-          >
-            <RotateCcw size={14} />
-            {Math.round(transform.scale * 100)}%
-          </button>
-        )}
+        {/* Mobile zoom hint */}
         {!isZoomed && (
           <div className="lg:hidden flex items-center gap-1 text-[10px] text-gray-400 font-medium">
             <ZoomIn size={12} />
@@ -134,6 +130,46 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
               brushSize={brushSize}
               onCommand={execute}
             />
+          </div>
+
+          {/* Floating zoom controls — bottom-left of canvas */}
+          <div className="absolute bottom-3 left-3 z-20 flex flex-col gap-1.5">
+            <button
+              type="button"
+              onClick={zoomIn}
+              disabled={!canZoomIn}
+              aria-label="Aumentar zoom"
+              title="Aumentar zoom"
+              className={zoomBtnClass}
+            >
+              <ZoomIn size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={zoomOut}
+              disabled={!canZoomOut}
+              aria-label="Diminuir zoom"
+              title="Diminuir zoom"
+              className={zoomBtnClass}
+            >
+              <ZoomOut size={18} />
+            </button>
+            {isZoomed && (
+              <button
+                type="button"
+                onClick={resetZoom}
+                aria-label="Resetar zoom"
+                title="Voltar ao normal"
+                className={zoomBtnClass}
+              >
+                <Maximize size={16} />
+              </button>
+            )}
+            {isZoomed && (
+              <span className="text-[10px] font-bold text-gray-500 text-center bg-white/80 rounded-lg px-1 py-0.5">
+                {zoomPercent}%
+              </span>
+            )}
           </div>
         </div>
 
