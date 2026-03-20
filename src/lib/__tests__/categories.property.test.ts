@@ -5,7 +5,6 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
-  ensureDefaultCategory,
 } from '../categories';
 import type { Category } from '../types';
 
