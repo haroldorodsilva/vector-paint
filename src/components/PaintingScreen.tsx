@@ -91,62 +91,11 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
         <h1 className="text-sm font-bold text-purple-700 truncate flex-1">
           {drawing.name}
         </h1>
-        {/* Zoom hint */}
-        {!isZoomed && (
-          <div className="flex items-center gap-1.5">
-            <span className="lg:hidden text-[10px] text-gray-400 font-medium flex items-center gap-1">
-              <ZoomIn size={12} />
-              2 dedos p/ zoom
-            </span>
-            <button
-              type="button"
-              onClick={zoomIn}
-              disabled={!canZoomIn}
-              aria-label="Aumentar zoom"
-              className="w-8 h-8 flex items-center justify-center rounded-xl
-                bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all cursor-pointer
-                disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ZoomIn size={16} />
-            </button>
-          </div>
-        )}
-        {isZoomed && (
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={zoomOut}
-              disabled={!canZoomOut}
-              aria-label="Diminuir zoom"
-              className="w-8 h-8 flex items-center justify-center rounded-xl
-                bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all cursor-pointer
-                disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ZoomOut size={16} />
-            </button>
-            <button
-              type="button"
-              onClick={resetZoom}
-              aria-label="Resetar zoom"
-              className="flex items-center gap-1 px-2 py-1 rounded-xl bg-purple-100 text-purple-700
-                text-xs font-bold cursor-pointer hover:bg-purple-200 transition-colors"
-            >
-              <Maximize size={14} />
-              {zoomPercent}%
-            </button>
-            <button
-              type="button"
-              onClick={zoomIn}
-              disabled={!canZoomIn}
-              aria-label="Aumentar zoom"
-              className="w-8 h-8 flex items-center justify-center rounded-xl
-                bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all cursor-pointer
-                disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ZoomIn size={16} />
-            </button>
-          </div>
-        )}
+        {/* Mobile zoom hint */}
+        <span className="lg:hidden text-[10px] text-gray-400 font-medium flex items-center gap-1">
+          <ZoomIn size={12} />
+          2 dedos p/ zoom
+        </span>
       </header>
 
       <div className="flex-1 flex flex-col landscape:flex-row lg:flex-row min-h-0">
