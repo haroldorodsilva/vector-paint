@@ -55,19 +55,22 @@ const SVGCanvas = forwardRef<SVGCanvasHandle, SVGCanvasProps>(
       // Make the SVG fill its container while preserving aspect ratio
       const svg = container.querySelector('svg');
       if (svg) {
-        svg.setAttribute('width', '100%');
-        svg.setAttribute('height', '100%');
-        svg.style.display = 'block';
-        svg.style.maxWidth = '100%';
-        svg.style.maxHeight = '100%';
-        svg.style.objectFit = 'contain';
-        // Ensure viewBox is set so the SVG scales properly
-        if (!svg.getAttribute('viewBox') && svg.getAttribute('width') && svg.getAttribute('height')) {
+        // Ensure viewBox is set before removing fixed dimensions
+        if (!svg.getAttribute('viewBox')) {
           const w = svg.getAttribute('width');
           const h = svg.getAttribute('height');
           if (w && h) svg.setAttribute('viewBox', `0 0 ${parseFloat(w)} ${parseFloat(h)}`);
         }
         svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        // Remove fixed dimensions so it scales to container
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.display = 'block';
+        svg.style.maxWidth = '100%';
+        svg.style.maxHeight = '100%';
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        svg.style.margin = '0 auto';
       }
 
       // Store original fill colors
