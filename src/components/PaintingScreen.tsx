@@ -147,7 +147,23 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
           )}
 
           {/* Floating zoom controls — bottom-left of canvas */}
-          <div className="absolute bottom-3 left-3 z-20 flex flex-col gap-1.5">
+          <div className="absolute bottom-3 left-3 z-20 flex flex-col items-center gap-1.5">
+            {isZoomed && (
+              <span className="text-[10px] font-bold text-gray-500 text-center bg-white/80 rounded-lg px-1.5 py-0.5 shadow-sm">
+                {zoomPercent}%
+              </span>
+            )}
+            {isZoomed && (
+              <button
+                type="button"
+                onClick={resetZoom}
+                aria-label="Resetar zoom"
+                title="Voltar ao normal"
+                className={zoomBtnClass}
+              >
+                <Maximize size={16} />
+              </button>
+            )}
             <button
               type="button"
               onClick={zoomIn}
@@ -168,22 +184,6 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
             >
               <ZoomOut size={18} />
             </button>
-            {isZoomed && (
-              <button
-                type="button"
-                onClick={resetZoom}
-                aria-label="Resetar zoom"
-                title="Voltar ao normal"
-                className={zoomBtnClass}
-              >
-                <Maximize size={16} />
-              </button>
-            )}
-            {isZoomed && (
-              <span className="text-[10px] font-bold text-gray-500 text-center bg-white/80 rounded-lg px-1 py-0.5">
-                {zoomPercent}%
-              </span>
-            )}
           </div>
         </div>
 
