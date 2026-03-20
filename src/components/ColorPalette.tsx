@@ -27,6 +27,7 @@ const COLORS = [
 interface ColorPaletteProps {
   selectedColor: string;
   onSelectColor: (color: string) => void;
+  compact?: boolean;
 }
 
 const isLight = (hex: string) => {
@@ -39,32 +40,33 @@ const isLight = (hex: string) => {
 export default function ColorPalette({
   selectedColor,
   onSelectColor,
+  compact = false,
 }: ColorPaletteProps) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       {/* Selected color + custom picker */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <div
-          className="w-10 h-10 rounded-full border-3 border-purple-400 shadow-md shrink-0"
+          className={`${compact ? 'w-7 h-7 border-2' : 'w-10 h-10 border-3'} rounded-full border-purple-400 shadow-md shrink-0`}
           style={{ backgroundColor: selectedColor }}
           aria-label={`Cor selecionada: ${selectedColor}`}
         />
-        <label className="flex items-center gap-1.5 cursor-pointer bg-gray-100 hover:bg-gray-200 rounded-lg px-2 py-1.5 transition-colors" title="Escolher cor personalizada">
-          <Pipette size={20} className="text-purple-500" />
-          <span className="text-xs font-semibold text-gray-600">Minha cor</span>
+        <label className="flex items-center gap-1 cursor-pointer bg-gray-100 hover:bg-gray-200 rounded-lg px-1.5 py-1 transition-colors" title="Escolher cor personalizada">
+          <Pipette size={compact ? 14 : 20} className="text-purple-500" />
+          <span className={`${compact ? 'text-[10px]' : 'text-xs'} font-semibold text-gray-600`}>Minha cor</span>
           <input
             type="color"
             value={selectedColor}
             onChange={(e) => onSelectColor(e.target.value)}
-            className="w-8 h-8 cursor-pointer border-0 p-0 rounded-md"
+            className={`${compact ? 'w-6 h-6' : 'w-8 h-8'} cursor-pointer border-0 p-0 rounded-md`}
             aria-label="Escolher cor personalizada"
           />
         </label>
       </div>
 
-      {/* Compact color grid — 6 columns matching the family grouping */}
+      {/* Color grid */}
       <div
-        className="grid grid-cols-6 gap-1.5"
+        className={`grid ${compact ? 'grid-cols-10 gap-1' : 'grid-cols-6 gap-1.5'}`}
         role="radiogroup"
         aria-label="Paleta de cores"
       >
@@ -78,11 +80,11 @@ export default function ColorPalette({
               aria-checked={active}
               aria-label={`Cor ${color}`}
               onClick={() => onSelectColor(color)}
-              className={`w-full aspect-square rounded-full transition-all duration-150 cursor-pointer ${
+              className={`${compact ? 'w-6 h-6' : 'w-full aspect-square'} rounded-full transition-all duration-150 cursor-pointer ${
                 active
-                  ? 'scale-115 ring-3 ring-purple-500 ring-offset-2 z-10 shadow-lg'
+                  ? `${compact ? 'scale-110 ring-2' : 'scale-115 ring-3'} ring-purple-500 ring-offset-1 z-10 shadow-lg`
                   : 'hover:scale-110 hover:shadow-md'
-              } ${isLight(color) ? 'border-2 border-gray-300' : ''}`}
+              } ${isLight(color) ? `${compact ? 'border' : 'border-2'} border-gray-300` : ''}`}
               style={{ backgroundColor: color }}
             />
           );

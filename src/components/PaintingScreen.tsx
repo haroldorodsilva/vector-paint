@@ -16,7 +16,7 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
   const [activeColor, setActiveColor] = useState('#F44336');
   const [brushSize, setBrushSize] = useState(5);
 
-  const { execute, undo, redo, canUndo, canRedo } = useUndoRedo();
+  const { execute, undo, canUndo } = useUndoRedo();
 
   const svgCanvasRef = useRef<SVGCanvasHandle>(null);
   const canvasOverlayRef = useRef<CanvasOverlayHandle>(null);
@@ -60,9 +60,9 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
 
       {/* Main content */}
       <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-        {/* Canvas area */}
+        {/* Canvas area — guaranteed min height on mobile */}
         <div
-          className="flex-1 relative min-h-0"
+          className="flex-1 relative min-h-[40vh] lg:min-h-0"
           style={{ cursor: cursorStyle }}
         >
           <SVGCanvas
@@ -91,9 +91,7 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
             brushSize={brushSize}
             onBrushSizeChange={setBrushSize}
             canUndo={canUndo}
-            canRedo={canRedo}
             onUndo={undo}
-            onRedo={redo}
             onClearAll={handleClearAll}
           />
           <div className="w-full h-px bg-gray-200" />
@@ -105,24 +103,24 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
           <ExportButton onExport={handleExport} />
         </aside>
 
-        {/* Mobile/tablet bottom bar */}
+        {/* Mobile/tablet bottom bar — compact, scrollable */}
         <div className="lg:hidden shrink-0 bg-white/95 backdrop-blur shadow-[0_-2px_8px_rgba(0,0,0,0.08)]
-          px-3 py-2.5 flex flex-col gap-2.5 z-10 max-h-[50vh] overflow-y-auto scrollbar-none">
+          px-3 py-2 flex flex-col gap-1.5 z-10 max-h-[45vh] overflow-y-auto scrollbar-none">
           <Toolbar
             activeTool={activeTool}
             onSelectTool={setActiveTool}
             brushSize={brushSize}
             onBrushSizeChange={setBrushSize}
             canUndo={canUndo}
-            canRedo={canRedo}
             onUndo={undo}
-            onRedo={redo}
             onClearAll={handleClearAll}
+            compact
           />
           <div className="w-full h-px bg-gray-200" />
           <ColorPalette
             selectedColor={activeColor}
             onSelectColor={setActiveColor}
+            compact
           />
           <div className="w-full h-px bg-gray-200" />
           <ExportButton onExport={handleExport} />
