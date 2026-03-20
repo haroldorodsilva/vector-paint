@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface ZoomPanState {
   scale: number;
@@ -9,13 +9,15 @@ export interface ZoomPanState {
 const MIN_SCALE = 1;
 const MAX_SCALE = 5;
 const ZOOM_STEP = 0.5;
+const WHEEL_ZOOM_FACTOR = 0.002;
 
 export function useZoomPan() {
   const [transform, setTransform] = useState<ZoomPanState>({ scale: 1, x: 0, y: 0 });
   const stateRef = useRef(transform);
   stateRef.current = transform;
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Track pinch gesture
+  // --- Pinch (touch) ---
   const startDistRef = useRef(0);
   const startScaleRef = useRef(1);
   const startMidRef = useRef({ x: 0, y: 0 });
@@ -68,6 +70,83 @@ export function useZoomPan() {
     }
   }, []);
 
+  // --- Mouse wheel zoom ---
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      // Ctrl+wheel or pinch-on-trackpad
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        setTransform((prev) => {
+          const delta = -e.deltaY * WHEEL_ZOOM_FACTOR;
+          const rawScale = prev.scale * (1 + delta);
+          const scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, rawScale));
+          if (scale <= 1.05) return { scale: 1, x: 0, y: 0 };
+          return { ...prev, scale };
+        });
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
+  // --- Mouse drag to pan (middle-click, or right-click, or when zoomed: any click + spacebar held) ---
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const dragTransStartRef = useRef({ x: 0, y: 0 });
+  const spaceHeldRef = useRef(false);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && stateRef.current.scale > 1.05) {
+        spaceHeldRef.current = true;
+      }
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        spaceHeldRef.current = false;
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    // Middle button, or space+left click when zoomed
+    const isMiddle = e.button === 1;
+    const isSpaceDrag = e.button === 0 && spaceHeldRef.current && stateRef.current.scale > 1.05;
+    if (isMiddle || isSpaceDrag) {
+      e.preventDefault();
+      isDraggingRef.current = true;
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      dragTransStartRef.current = { x: stateRef.current.x, y: stateRef.current.y };
+    }
+  }, []);
+
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    e.preventDefault();
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+    setTransform((prev) => ({
+      ...prev,
+      x: dragTransStartRef.current.x + dx,
+      y: dragTransStartRef.current.y + dy,
+    }));
+  }, []);
+
+  const onMouseUp = useCallback(() => {
+    isDraggingRef.current = false;
+  }, []);
+
+  // --- Button controls ---
   const zoomIn = useCallback(() => {
     setTransform((prev) => {
       const scale = Math.min(MAX_SCALE, prev.scale + ZOOM_STEP);
@@ -89,6 +168,7 @@ export function useZoomPan() {
 
   return {
     transform,
+    containerRef,
     isPinching: isPinchingRef,
     zoomIn,
     zoomOut,
@@ -99,6 +179,10 @@ export function useZoomPan() {
       onTouchStart,
       onTouchMove,
       onTouchEnd,
+      onMouseDown,
+      onMouseMove,
+      onMouseUp,
+      onMouseLeave: onMouseUp,
     },
   };
 }
