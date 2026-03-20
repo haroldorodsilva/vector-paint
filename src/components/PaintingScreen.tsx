@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ZoomIn, RotateCcw } from 'lucide-react';
 import type { PaintingScreenProps, PaintTool } from '../lib/types';
 import { useUndoRedo } from '../lib/useUndoRedo';
+import { useZoomPan } from '../lib/useZoomPan';
 import { clearAll } from '../lib/paintEngine';
 import { buildCursor } from '../lib/cursor';
 import { exportImage } from '../lib/exportImage';
@@ -17,6 +18,7 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
   const [brushSize, setBrushSize] = useState(5);
 
   const { execute, undo, canUndo } = useUndoRedo();
+  const { transform, resetZoom, handlers: zoomHandlers } = useZoomPan();
 
   const svgCanvasRef = useRef<SVGCanvasHandle>(null);
   const canvasOverlayRef = useRef<CanvasOverlayHandle>(null);
@@ -39,6 +41,7 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
   }, [drawing.name]);
 
   const cursorStyle = buildCursor(activeColor);
+  const isZoomed = transform.scale > 1.05;
 
   const toolbarProps = {
     activeTool,
@@ -77,38 +80,61 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
         >
           <ArrowLeft size={20} />
         </button>
-        <h1 className="text-sm font-bold text-purple-700 truncate">
+        <h1 className="text-sm font-bold text-purple-700 truncate flex-1">
           {drawing.name}
         </h1>
+        {/* Zoom indicator — only on touch devices when zoomed */}
+        {isZoomed && (
+          <button
+            type="button"
+            onClick={resetZoom}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-purple-100 text-purple-700
+              text-xs font-bold cursor-pointer hover:bg-purple-200 transition-colors"
+            aria-label="Resetar zoom"
+          >
+            <RotateCcw size={14} />
+            {Math.round(transform.scale * 100)}%
+          </button>
+        )}
+        {!isZoomed && (
+          <div className="lg:hidden flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+            <ZoomIn size={12} />
+            2 dedos p/ zoom
+          </div>
+        )}
       </header>
 
-      {/*
-        Layout adapts by orientation:
-        - Portrait (mobile vertical): column → SVG top, controls bottom
-        - Landscape (mobile rotated / tablet): row → SVG left, sidebar right
-        - Desktop (lg+): always row with full sidebar
-      */}
       <div className="flex-1 flex flex-col landscape:flex-row lg:flex-row min-h-0">
-        {/* Canvas area */}
+        {/* Canvas area with pinch-to-zoom */}
         <div
-          className="flex-1 relative min-h-0"
+          className="flex-1 relative min-h-0 overflow-hidden"
           style={{ cursor: cursorStyle }}
+          {...zoomHandlers}
         >
-          <SVGCanvas
-            ref={svgCanvasRef}
-            svgContent={drawing.svgContent}
-            activeTool={activeTool}
-            activeColor={activeColor}
-            brushSize={brushSize}
-            onCommand={execute}
-          />
-          <CanvasOverlay
-            ref={canvasOverlayRef}
-            isActive={activeTool === 'brush'}
-            color={activeColor}
-            brushSize={brushSize}
-            onCommand={execute}
-          />
+          <div
+            className="w-full h-full"
+            style={{
+              transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+              transformOrigin: 'center center',
+              willChange: transform.scale !== 1 ? 'transform' : 'auto',
+            }}
+          >
+            <SVGCanvas
+              ref={svgCanvasRef}
+              svgContent={drawing.svgContent}
+              activeTool={activeTool}
+              activeColor={activeColor}
+              brushSize={brushSize}
+              onCommand={execute}
+            />
+            <CanvasOverlay
+              ref={canvasOverlayRef}
+              isActive={activeTool === 'brush'}
+              color={activeColor}
+              brushSize={brushSize}
+              onCommand={execute}
+            />
+          </div>
         </div>
 
         {/* Desktop sidebar (lg+) */}
@@ -117,13 +143,13 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
           {controls(false)}
         </aside>
 
-        {/* Landscape sidebar (mobile/tablet rotated) — hidden on lg+ and portrait */}
+        {/* Landscape sidebar (mobile/tablet rotated) */}
         <aside className="hidden landscape:flex lg:!hidden flex-col gap-2 w-56 shrink-0 p-2 bg-white/95 backdrop-blur
           shadow-[-2px_0_8px_rgba(0,0,0,0.06)] overflow-y-auto scrollbar-none z-10">
           {controls(true)}
         </aside>
 
-        {/* Portrait bottom bar (mobile vertical) — hidden on landscape and lg+ */}
+        {/* Portrait bottom bar (mobile vertical) */}
         <div className="flex landscape:hidden lg:!hidden shrink-0 bg-white/95 backdrop-blur
           shadow-[0_-2px_8px_rgba(0,0,0,0.08)]
           px-3 py-2 flex-col gap-1.5 z-10 max-h-[45vh] overflow-y-auto scrollbar-none">
