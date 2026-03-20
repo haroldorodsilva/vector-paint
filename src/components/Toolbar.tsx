@@ -1,5 +1,6 @@
 import { PaintBucket, Paintbrush, Eraser, Undo2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { PaintTool } from '../lib/types';
 
 interface ToolbarProps {
@@ -121,9 +122,9 @@ export default function Toolbar({
         )}
       </div>
 
-      {/* Clear confirmation modal */}
-      {showClearModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      {/* Clear confirmation modal — portal to body so it covers the full screen */}
+      {showClearModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl p-6 mx-4 max-w-sm w-full text-center">
             <div className="text-5xl mb-3">🗑️</div>
             <h2 className="text-lg font-bold text-gray-800 mb-2">Limpar tudo?</h2>
@@ -149,7 +150,8 @@ export default function Toolbar({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
