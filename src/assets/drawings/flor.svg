@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 420">
+  <!-- Caule -->
+  <path d="M200 390 L200 260" stroke="#222" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <!-- Folha esquerda -->
+  <path d="M200 330 Q155 295 145 270 Q170 275 200 305 Z" fill="white" stroke="#222" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Folha direita -->
+  <path d="M200 310 Q245 275 255 250 Q230 255 200 285 Z" fill="white" stroke="#222" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Pétalas (8 pétalas ao redor do centro) -->
+  <ellipse cx="200" cy="120" rx="30" ry="55" fill="white" stroke="#222" stroke-width="3"/>
+  <ellipse cx="200" cy="120" rx="30" ry="55" fill="white" stroke="#222" stroke-width="3" transform="rotate(45 200 190)"/>
+  <ellipse cx="200" cy="120" rx="30" ry="55" fill="white" stroke="#222" stroke-width="3" transform="rotate(90 200 190)"/>
+  <ellipse cx="200" cy="120" rx="30" ry="55" fill="white" stroke="#222" stroke-width="3" transform="rotate(135 200 190)"/>
+  <ellipse cx="200" cy="120" rx="30" ry="55" fill="white" stroke="#222" stroke-width="3" transform="rotate(22.5 200 190)"/>
+  <ellipse cx="200" cy="120" rx="30" ry="55" fill="white" stroke="#222" stroke-width="3" transform="rotate(67.5 200 190)"/>
+  <ellipse cx="200" cy="120" rx="30" ry="55" fill="white" stroke="#222" stroke-width="3" transform="rotate(112.5 200 190)"/>
+  <ellipse cx="200" cy="120" rx="30" ry="55" fill="white" stroke="#222" stroke-width="3" transform="rotate(157.5 200 190)"/>
+  <!-- Centro da flor -->
+  <circle cx="200" cy="190" r="42" fill="white" stroke="#222" stroke-width="3.5"/>
+  <!-- Detalhes do centro -->
+  <circle cx="200" cy="190" r="28" fill="white" stroke="#222" stroke-width="2"/>
+</svg>

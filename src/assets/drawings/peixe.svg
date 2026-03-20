@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 300">
+  <!-- Cauda -->
+  <path d="M330 150 L400 80 L410 150 L400 220 Z" fill="white" stroke="#222" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Corpo -->
+  <ellipse cx="185" cy="150" rx="155" ry="95" fill="white" stroke="#222" stroke-width="3.5"/>
+  <!-- Barriga -->
+  <ellipse cx="175" cy="165" rx="110" ry="60" fill="white" stroke="#222" stroke-width="2"/>
+  <!-- Nadadeira dorsal -->
+  <path d="M120 58 Q160 25 220 55 Q190 58 160 62 Z" fill="white" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Nadadeira ventral -->
+  <path d="M140 235 Q165 265 200 242 Q175 238 155 235 Z" fill="white" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Olho -->
+  <circle cx="75" cy="130" r="28" fill="white" stroke="#222" stroke-width="3"/>
+  <circle cx="75" cy="130" r="16" fill="#222"/>
+  <circle cx="68" cy="122" r="6" fill="white"/>
+  <!-- Escamas (detalhes) -->
+  <path d="M200 110 Q220 140 200 170" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M240 100 Q265 140 240 178" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M280 110 Q300 140 280 170" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Boca -->
+  <path d="M30 148 Q22 158 30 168" fill="none" stroke="#222" stroke-width="3" stroke-linecap="round"/>
+  <!-- Bolhas -->
+  <circle cx="18" cy="100" r="8" fill="white" stroke="#222" stroke-width="2"/>
+  <circle cx="35" cy="75" r="5" fill="white" stroke="#222" stroke-width="2"/>
+  <circle cx="8" cy="60" r="4" fill="white" stroke="#222" stroke-width="2"/>
+</svg>

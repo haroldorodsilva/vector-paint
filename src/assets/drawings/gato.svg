@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 420">
+  <!-- Corpo -->
+  <ellipse cx="200" cy="300" rx="95" ry="100" fill="white" stroke="#222" stroke-width="3.5"/>
+  <!-- Barriga -->
+  <ellipse cx="200" cy="315" rx="55" ry="65" fill="white" stroke="#222" stroke-width="2"/>
+  <!-- Cabeça -->
+  <circle cx="200" cy="165" r="90" fill="white" stroke="#222" stroke-width="3.5"/>
+  <!-- Orelha esquerda -->
+  <polygon points="120,110 95,55 155,90" fill="white" stroke="#222" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Interior orelha esquerda -->
+  <polygon points="120,100 103,68 145,88" fill="white" stroke="#222" stroke-width="1.5"/>
+  <!-- Orelha direita -->
+  <polygon points="280,110 305,55 245,90" fill="white" stroke="#222" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Interior orelha direita -->
+  <polygon points="280,100 297,68 255,88" fill="white" stroke="#222" stroke-width="1.5"/>
+  <!-- Olho esquerdo -->
+  <ellipse cx="165" cy="155" rx="22" ry="26" fill="white" stroke="#222" stroke-width="2.5"/>
+  <ellipse cx="165" cy="158" rx="10" ry="16" fill="#222"/>
+  <circle cx="160" cy="152" r="4" fill="white"/>
+  <!-- Olho direito -->
+  <ellipse cx="235" cy="155" rx="22" ry="26" fill="white" stroke="#222" stroke-width="2.5"/>
+  <ellipse cx="235" cy="158" rx="10" ry="16" fill="#222"/>
+  <circle cx="230" cy="152" r="4" fill="white"/>
+  <!-- Nariz -->
+  <polygon points="200,185 192,198 208,198" fill="white" stroke="#222" stroke-width="2"/>
+  <!-- Boca -->
+  <path d="M192 198 Q185 210 175 212" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+  <path d="M208 198 Q215 210 225 212" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+  <!-- Bigodes -->
+  <line x1="140" y1="190" x2="186" y2="195" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="140" y1="200" x2="186" y2="200" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="214" y1="195" x2="260" y2="190" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="214" y1="200" x2="260" y2="200" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Cauda -->
+  <path d="M295 360 Q360 330 370 280 Q380 240 350 230" fill="none" stroke="#222" stroke-width="12" stroke-linecap="round"/>
+  <path d="M295 360 Q360 330 370 280 Q380 240 350 230" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/>
+</svg>

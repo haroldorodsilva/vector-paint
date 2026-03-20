@@ -1,0 +1,140 @@
+import { useCallback, useRef, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
+import type { PaintingScreenProps, PaintTool } from '../lib/types';
+import { useUndoRedo } from '../lib/useUndoRedo';
+import { clearAll } from '../lib/paintEngine';
+import { buildCursor } from '../lib/cursor';
+import { exportImage } from '../lib/exportImage';
+import SVGCanvas, { type SVGCanvasHandle } from './SVGCanvas';
+import CanvasOverlay, { type CanvasOverlayHandle } from './CanvasOverlay';
+import Toolbar from './Toolbar';
+import ColorPalette from './ColorPalette';
+import ExportButton from './ExportButton';
+
+export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps) {
+  const [activeTool, setActiveTool] = useState<PaintTool>('bucket');
+  const [activeColor, setActiveColor] = useState('#F44336');
+  const [brushSize, setBrushSize] = useState(5);
+
+  const { execute, undo, redo, canUndo, canRedo } = useUndoRedo();
+
+  const svgCanvasRef = useRef<SVGCanvasHandle>(null);
+  const canvasOverlayRef = useRef<CanvasOverlayHandle>(null);
+
+  const handleClearAll = useCallback(() => {
+    const svgHandle = svgCanvasRef.current;
+    if (!svgHandle) return;
+    const elements = svgHandle.getElements();
+    const originalColors = svgHandle.getOriginalColors();
+    const cmd = clearAll(elements, originalColors);
+    execute(cmd);
+    canvasOverlayRef.current?.clearCanvas();
+  }, [execute]);
+
+  const handleExport = useCallback(async (format: 'png' | 'jpg') => {
+    const svgEl = svgCanvasRef.current?.getSvgElement();
+    if (!svgEl) return;
+    const canvasEl = canvasOverlayRef.current?.getCanvas() ?? null;
+    await exportImage(svgEl, canvasEl, drawing.name, format);
+  }, [drawing.name]);
+
+  const cursorStyle = buildCursor(activeColor);
+
+  return (
+    <div className="h-screen flex flex-col bg-gradient-to-b from-purple-50 to-blue-50 overflow-hidden">
+      {/* Header — compact */}
+      <header className="flex items-center gap-2 px-3 py-2 bg-white/90 backdrop-blur shadow-sm shrink-0 z-20">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Voltar para galeria"
+          className="w-9 h-9 flex items-center justify-center rounded-full
+            bg-gray-100 hover:bg-gray-200 transition-all cursor-pointer"
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <h1 className="text-sm font-bold text-purple-700 truncate">
+          {drawing.name}
+        </h1>
+      </header>
+
+      {/* Main content: canvas + sidebar (desktop) or canvas + bottom bar (mobile) */}
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+        {/* Canvas area — takes all available space */}
+        <div
+          className="flex-1 relative min-h-0"
+          style={{ cursor: cursorStyle }}
+        >
+          <SVGCanvas
+            ref={svgCanvasRef}
+            svgContent={drawing.svgContent}
+            activeTool={activeTool}
+            activeColor={activeColor}
+            brushSize={brushSize}
+            onCommand={execute}
+          />
+          <CanvasOverlay
+            ref={canvasOverlayRef}
+            isActive={activeTool === 'brush'}
+            color={activeColor}
+            brushSize={brushSize}
+            onCommand={execute}
+          />
+        </div>
+
+        {/* Desktop sidebar — right side, scrollable */}
+        <aside className="hidden lg:flex flex-col gap-3 w-56 shrink-0 p-3 bg-white/90 backdrop-blur
+          shadow-[-2px_0_8px_rgba(0,0,0,0.06)] overflow-y-auto z-10">
+          <Toolbar
+            activeTool={activeTool}
+            onSelectTool={setActiveTool}
+            brushSize={brushSize}
+            onBrushSizeChange={setBrushSize}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={undo}
+            onRedo={redo}
+            onClearAll={handleClearAll}
+          />
+          <div className="w-full h-px bg-gray-200" />
+          <ColorPalette
+            selectedColor={activeColor}
+            onSelectColor={setActiveColor}
+          />
+          <div className="w-full h-px bg-gray-200" />
+          <ExportButton onExport={handleExport} />
+        </aside>
+
+        {/* Mobile/tablet floating bottom bar */}
+        <div className="lg:hidden shrink-0 bg-white/95 backdrop-blur shadow-[0_-2px_8px_rgba(0,0,0,0.08)]
+          px-3 py-2 flex flex-col gap-2 z-10 max-h-[40vh] overflow-y-auto">
+          <div className="flex gap-3 items-start">
+            {/* Tools on the left */}
+            <div className="shrink-0">
+              <Toolbar
+                activeTool={activeTool}
+                onSelectTool={setActiveTool}
+                brushSize={brushSize}
+                onBrushSizeChange={setBrushSize}
+                canUndo={canUndo}
+                canRedo={canRedo}
+                onUndo={undo}
+                onRedo={redo}
+                onClearAll={handleClearAll}
+              />
+            </div>
+            {/* Export on the right */}
+            <div className="shrink-0 ml-auto self-center">
+              <ExportButton onExport={handleExport} />
+            </div>
+          </div>
+          {/* Color palette — horizontal scroll on mobile */}
+          <ColorPalette
+            selectedColor={activeColor}
+            onSelectColor={setActiveColor}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

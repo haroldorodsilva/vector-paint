@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* Kid-friendly base styles */
+html {
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: linear-gradient(135deg, #f0e6ff 0%, #e0f0ff 100%);
+}
+
+/* Hide scrollbar but keep scrolling */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Subtle animation for interactive elements */
+button, [role="tab"] {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* Force injected SVGs to respect container bounds */
+.svg-contain {
+  position: relative;
+}
+.svg-contain svg {
+  display: block !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: hidden;
+  margin: 0 auto;
+}

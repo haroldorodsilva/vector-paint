@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Asa superior esquerda -->
+  <path d="M200 210 Q140 120 70 110 Q20 108 30 170 Q40 230 140 240 Z" fill="white" stroke="#222" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Asa superior direita -->
+  <path d="M200 210 Q260 120 330 110 Q380 108 370 170 Q360 230 260 240 Z" fill="white" stroke="#222" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Asa inferior esquerda -->
+  <path d="M200 230 Q130 270 90 330 Q70 375 130 365 Q185 355 200 280 Z" fill="white" stroke="#222" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Asa inferior direita -->
+  <path d="M200 230 Q270 270 310 330 Q330 375 270 365 Q215 355 200 280 Z" fill="white" stroke="#222" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Decoração asa sup esq -->
+  <ellipse cx="115" cy="175" rx="28" ry="18" fill="white" stroke="#222" stroke-width="2"/>
+  <!-- Decoração asa sup dir -->
+  <ellipse cx="285" cy="175" rx="28" ry="18" fill="white" stroke="#222" stroke-width="2"/>
+  <!-- Decoração asa inf esq -->
+  <circle cx="125" cy="320" r="16" fill="white" stroke="#222" stroke-width="2"/>
+  <!-- Decoração asa inf dir -->
+  <circle cx="275" cy="320" r="16" fill="white" stroke="#222" stroke-width="2"/>
+  <!-- Corpo -->
+  <ellipse cx="200" cy="240" rx="11" ry="58" fill="white" stroke="#222" stroke-width="3"/>
+  <!-- Cabeça -->
+  <circle cx="200" cy="178" r="14" fill="white" stroke="#222" stroke-width="3"/>
+  <!-- Olhos -->
+  <circle cx="195" cy="175" r="3" fill="#222"/>
+  <circle cx="205" cy="175" r="3" fill="#222"/>
+  <!-- Antenas -->
+  <path d="M194 165 Q175 145 168 128" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="166" cy="124" r="5" fill="white" stroke="#222" stroke-width="2"/>
+  <path d="M206 165 Q225 145 232 128" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="234" cy="124" r="5" fill="white" stroke="#222" stroke-width="2"/>
+</svg>

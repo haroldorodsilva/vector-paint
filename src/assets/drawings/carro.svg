@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 280">
+  <!-- Corpo principal -->
+  <rect x="30" y="150" width="400" height="90" rx="18" fill="white" stroke="#222" stroke-width="3.5"/>
+  <!-- Teto / cabine -->
+  <path d="M110 150 Q130 85 175 75 L285 75 Q330 85 350 150 Z" fill="white" stroke="#222" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Janela esquerda -->
+  <path d="M125 148 Q138 100 170 92 L220 92 L220 148 Z" fill="white" stroke="#222" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Janela direita -->
+  <path d="M240 92 L290 92 Q322 100 335 148 L240 148 Z" fill="white" stroke="#222" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Divisor janelas -->
+  <line x1="230" y1="92" x2="230" y2="148" stroke="#222" stroke-width="2.5"/>
+  <!-- Roda traseira -->
+  <circle cx="110" cy="242" r="42" fill="white" stroke="#222" stroke-width="3.5"/>
+  <circle cx="110" cy="242" r="22" fill="white" stroke="#222" stroke-width="2.5"/>
+  <circle cx="110" cy="242" r="7" fill="#222"/>
+  <!-- Roda dianteira -->
+  <circle cx="340" cy="242" r="42" fill="white" stroke="#222" stroke-width="3.5"/>
+  <circle cx="340" cy="242" r="22" fill="white" stroke="#222" stroke-width="2.5"/>
+  <circle cx="340" cy="242" r="7" fill="#222"/>
+  <!-- Farol dianteiro -->
+  <ellipse cx="418" cy="175" rx="18" ry="12" fill="white" stroke="#222" stroke-width="2.5"/>
+  <!-- Farol traseiro -->
+  <rect x="28" y="165" width="22" height="15" rx="4" fill="white" stroke="#222" stroke-width="2.5"/>
+  <!-- Porta -->
+  <rect x="155" y="158" width="150" height="70" rx="8" fill="white" stroke="#222" stroke-width="2"/>
+  <!-- Maçaneta -->
+  <rect x="213" y="192" width="24" height="8" rx="4" fill="white" stroke="#222" stroke-width="2"/>
+</svg>
