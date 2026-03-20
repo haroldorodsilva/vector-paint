@@ -40,29 +40,58 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
 
   const cursorStyle = buildCursor(activeColor);
 
+  const toolbarProps = {
+    activeTool,
+    onSelectTool: setActiveTool,
+    brushSize,
+    onBrushSizeChange: setBrushSize,
+    canUndo,
+    onUndo: undo,
+    onClearAll: handleClearAll,
+  };
+
+  const controls = (compact: boolean) => (
+    <>
+      <Toolbar {...toolbarProps} compact={compact} />
+      <div className="w-full h-px bg-gray-200" />
+      <ColorPalette
+        selectedColor={activeColor}
+        onSelectColor={setActiveColor}
+        compact={compact}
+      />
+      <div className="w-full h-px bg-gray-200" />
+      <ExportButton onExport={handleExport} />
+    </>
+  );
+
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-b from-purple-50 to-blue-50 overflow-hidden">
+    <div className="h-[100dvh] flex flex-col bg-gradient-to-b from-purple-50 to-blue-50 overflow-hidden">
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 py-2.5 bg-white/90 backdrop-blur shadow-sm shrink-0 z-20">
+      <header className="flex items-center gap-3 px-4 py-2 bg-white/90 backdrop-blur shadow-sm shrink-0 z-20">
         <button
           type="button"
           onClick={onBack}
           aria-label="Voltar para galeria"
-          className="w-11 h-11 flex items-center justify-center rounded-2xl
+          className="w-10 h-10 flex items-center justify-center rounded-2xl
             bg-gray-100 hover:bg-gray-200 transition-all cursor-pointer"
         >
-          <ArrowLeft size={22} />
+          <ArrowLeft size={20} />
         </button>
-        <h1 className="text-base font-bold text-purple-700 truncate">
+        <h1 className="text-sm font-bold text-purple-700 truncate">
           {drawing.name}
         </h1>
       </header>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-        {/* Canvas area — guaranteed min height on mobile */}
+      {/*
+        Layout adapts by orientation:
+        - Portrait (mobile vertical): column → SVG top, controls bottom
+        - Landscape (mobile rotated / tablet): row → SVG left, sidebar right
+        - Desktop (lg+): always row with full sidebar
+      */}
+      <div className="flex-1 flex flex-col landscape:flex-row lg:flex-row min-h-0">
+        {/* Canvas area */}
         <div
-          className="flex-1 relative min-h-[40vh] lg:min-h-0"
+          className="flex-1 relative min-h-0"
           style={{ cursor: cursorStyle }}
         >
           <SVGCanvas
@@ -82,48 +111,23 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
           />
         </div>
 
-        {/* Desktop sidebar */}
+        {/* Desktop sidebar (lg+) */}
         <aside className="hidden lg:flex flex-col gap-4 w-72 shrink-0 p-4 bg-white/90 backdrop-blur
           shadow-[-2px_0_8px_rgba(0,0,0,0.06)] overflow-y-auto scrollbar-none z-10">
-          <Toolbar
-            activeTool={activeTool}
-            onSelectTool={setActiveTool}
-            brushSize={brushSize}
-            onBrushSizeChange={setBrushSize}
-            canUndo={canUndo}
-            onUndo={undo}
-            onClearAll={handleClearAll}
-          />
-          <div className="w-full h-px bg-gray-200" />
-          <ColorPalette
-            selectedColor={activeColor}
-            onSelectColor={setActiveColor}
-          />
-          <div className="w-full h-px bg-gray-200" />
-          <ExportButton onExport={handleExport} />
+          {controls(false)}
         </aside>
 
-        {/* Mobile/tablet bottom bar — compact, scrollable */}
-        <div className="lg:hidden shrink-0 bg-white/95 backdrop-blur shadow-[0_-2px_8px_rgba(0,0,0,0.08)]
-          px-3 py-2 flex flex-col gap-1.5 z-10 max-h-[45vh] overflow-y-auto scrollbar-none">
-          <Toolbar
-            activeTool={activeTool}
-            onSelectTool={setActiveTool}
-            brushSize={brushSize}
-            onBrushSizeChange={setBrushSize}
-            canUndo={canUndo}
-            onUndo={undo}
-            onClearAll={handleClearAll}
-            compact
-          />
-          <div className="w-full h-px bg-gray-200" />
-          <ColorPalette
-            selectedColor={activeColor}
-            onSelectColor={setActiveColor}
-            compact
-          />
-          <div className="w-full h-px bg-gray-200" />
-          <ExportButton onExport={handleExport} />
+        {/* Landscape sidebar (mobile/tablet rotated) — hidden on lg+ and portrait */}
+        <aside className="hidden landscape:flex lg:!hidden flex-col gap-2 w-56 shrink-0 p-2 bg-white/95 backdrop-blur
+          shadow-[-2px_0_8px_rgba(0,0,0,0.06)] overflow-y-auto scrollbar-none z-10">
+          {controls(true)}
+        </aside>
+
+        {/* Portrait bottom bar (mobile vertical) — hidden on landscape and lg+ */}
+        <div className="flex landscape:hidden lg:!hidden shrink-0 bg-white/95 backdrop-blur
+          shadow-[0_-2px_8px_rgba(0,0,0,0.08)]
+          px-3 py-2 flex-col gap-1.5 z-10 max-h-[45vh] overflow-y-auto scrollbar-none">
+          {controls(true)}
         </div>
       </div>
     </div>
