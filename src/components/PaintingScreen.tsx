@@ -19,7 +19,8 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
 
   const { execute, undo, canUndo } = useUndoRedo();
   const {
-    transform, containerRef: zoomContainerRef, zoomIn, zoomOut, resetZoom,
+    transform, containerRef: zoomContainerRef, isDragging, isDraggingRef,
+    zoomIn, zoomOut, resetZoom,
     canZoomIn, canZoomOut, handlers: zoomHandlers,
   } = useZoomPan();
 
@@ -103,7 +104,7 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
         <div
           ref={zoomContainerRef}
           className="flex-1 relative min-h-0 overflow-hidden"
-          style={{ cursor: isZoomed ? 'grab' : cursorStyle }}
+          style={{ cursor: isDragging ? 'grabbing' : cursorStyle }}
           {...zoomHandlers}
         >
           <div
@@ -121,6 +122,7 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
               activeColor={activeColor}
               brushSize={brushSize}
               onCommand={execute}
+              isDraggingRef={isDraggingRef}
             />
             <CanvasOverlay
               ref={canvasOverlayRef}
@@ -130,21 +132,6 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
               onCommand={execute}
             />
           </div>
-
-          {/* Drag overlay — captures mouse for pan when zoomed, lets clicks through when not dragging */}
-          {isZoomed && (
-            <div
-              className="absolute inset-0 z-10"
-              style={{ cursor: 'grab', touchAction: 'none' }}
-              onMouseDown={(e) => { zoomHandlers.onMouseDown(e); }}
-              onMouseMove={(e) => { zoomHandlers.onMouseMove(e); }}
-              onMouseUp={() => { zoomHandlers.onMouseUp(); }}
-              onMouseLeave={() => { zoomHandlers.onMouseLeave(); }}
-              onTouchStart={zoomHandlers.onTouchStart}
-              onTouchMove={zoomHandlers.onTouchMove}
-              onTouchEnd={zoomHandlers.onTouchEnd}
-            />
-          )}
 
           {/* Floating zoom controls — bottom-left of canvas */}
           <div className="absolute bottom-3 left-3 z-20 flex flex-col items-center gap-1.5">

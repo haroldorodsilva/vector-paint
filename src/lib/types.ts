@@ -48,4 +48,6 @@ export interface SVGCanvasProps {
   activeColor: string;
   brushSize: number;
   onCommand: (cmd: PaintCommand) => void;
+  /** Ref that is true when user is dragging to pan — suppresses paint clicks */
+  isDraggingRef?: React.RefObject<boolean>;
 }

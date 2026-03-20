@@ -19,7 +19,7 @@ export interface SVGCanvasHandle {
 }
 
 const SVGCanvas = forwardRef<SVGCanvasHandle, SVGCanvasProps>(
-  function SVGCanvas({ svgContent, activeTool, activeColor, onCommand }, ref) {
+  function SVGCanvas({ svgContent, activeTool, activeColor, onCommand, isDraggingRef }, ref) {
     const containerRef = useRef<HTMLDivElement>(null);
     const originalColorsRef = useRef<Map<SVGElement, string>>(new Map());
 
@@ -94,6 +94,7 @@ const SVGCanvas = forwardRef<SVGCanvasHandle, SVGCanvasProps>(
       if (!container) return;
 
       const handleClick = (e: Event) => {
+        if (isDraggingRef?.current) return;
         const target = (e.target as Element).closest(PAINTABLE_SELECTOR) as SVGElement | null;
         if (!target) return;
 
@@ -111,7 +112,7 @@ const SVGCanvas = forwardRef<SVGCanvasHandle, SVGCanvasProps>(
 
       container.addEventListener('click', handleClick);
       return () => container.removeEventListener('click', handleClick);
-    }, [activeTool, activeColor, onCommand]);
+    }, [activeTool, activeColor, onCommand, isDraggingRef]);
 
     return (
       <div
