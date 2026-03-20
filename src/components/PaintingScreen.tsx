@@ -131,6 +131,21 @@ export default function PaintingScreen({ drawing, onBack }: PaintingScreenProps)
             />
           </div>
 
+          {/* Drag overlay — captures mouse for pan when zoomed, lets clicks through when not dragging */}
+          {isZoomed && (
+            <div
+              className="absolute inset-0 z-10"
+              style={{ cursor: 'grab', touchAction: 'none' }}
+              onMouseDown={(e) => { zoomHandlers.onMouseDown(e); }}
+              onMouseMove={(e) => { zoomHandlers.onMouseMove(e); }}
+              onMouseUp={() => { zoomHandlers.onMouseUp(); }}
+              onMouseLeave={() => { zoomHandlers.onMouseLeave(); }}
+              onTouchStart={zoomHandlers.onTouchStart}
+              onTouchMove={zoomHandlers.onTouchMove}
+              onTouchEnd={zoomHandlers.onTouchEnd}
+            />
+          )}
+
           {/* Floating zoom controls — bottom-left of canvas */}
           <div className="absolute bottom-3 left-3 z-20 flex flex-col gap-1.5">
             <button

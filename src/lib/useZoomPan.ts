@@ -10,12 +10,17 @@ const MIN_SCALE = 1;
 const MAX_SCALE = 5;
 const ZOOM_STEP = 0.5;
 const WHEEL_ZOOM_FACTOR = 0.002;
+/** Minimum px movement to count as drag (avoids blocking clicks) */
+const DRAG_THRESHOLD = 4;
 
 export function useZoomPan() {
   const [transform, setTransform] = useState<ZoomPanState>({ scale: 1, x: 0, y: 0 });
   const stateRef = useRef(transform);
   stateRef.current = transform;
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Expose whether user is currently dragging (so click events can be suppressed)
+  const isDraggingRef = useRef(false);
 
   // --- Pinch (touch) ---
   const startDistRef = useRef(0);
@@ -70,13 +75,12 @@ export function useZoomPan() {
     }
   }, []);
 
-  // --- Mouse wheel zoom ---
+  // --- Mouse wheel zoom (Ctrl+wheel) ---
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
     const onWheel = (e: WheelEvent) => {
-      // Ctrl+wheel or pinch-on-trackpad
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
         setTransform((prev) => {
@@ -93,57 +97,44 @@ export function useZoomPan() {
     return () => el.removeEventListener('wheel', onWheel);
   }, []);
 
-  // --- Mouse drag to pan (middle-click, or right-click, or when zoomed: any click + spacebar held) ---
-  const isDraggingRef = useRef(false);
-  const dragStartRef = useRef({ x: 0, y: 0 });
-  const dragTransStartRef = useRef({ x: 0, y: 0 });
-  const spaceHeldRef = useRef(false);
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && stateRef.current.scale > 1.05) {
-        spaceHeldRef.current = true;
-      }
-    };
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        spaceHeldRef.current = false;
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-    };
-  }, []);
+  // --- Mouse left-click drag to pan (only when zoomed) ---
+  const mouseDownRef = useRef(false);
+  const dragStartMouseRef = useRef({ x: 0, y: 0 });
+  const dragStartTransRef = useRef({ x: 0, y: 0 });
+  const movedRef = useRef(false);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
-    // Middle button, or space+left click when zoomed
-    const isMiddle = e.button === 1;
-    const isSpaceDrag = e.button === 0 && spaceHeldRef.current && stateRef.current.scale > 1.05;
-    if (isMiddle || isSpaceDrag) {
-      e.preventDefault();
-      isDraggingRef.current = true;
-      dragStartRef.current = { x: e.clientX, y: e.clientY };
-      dragTransStartRef.current = { x: stateRef.current.x, y: stateRef.current.y };
-    }
+    if (e.button !== 0) return; // left button only
+    if (stateRef.current.scale <= 1.05) return; // only when zoomed
+    mouseDownRef.current = true;
+    movedRef.current = false;
+    isDraggingRef.current = false;
+    dragStartMouseRef.current = { x: e.clientX, y: e.clientY };
+    dragStartTransRef.current = { x: stateRef.current.x, y: stateRef.current.y };
   }, []);
 
   const onMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDraggingRef.current) return;
+    if (!mouseDownRef.current) return;
+    const dx = e.clientX - dragStartMouseRef.current.x;
+    const dy = e.clientY - dragStartMouseRef.current.y;
+    // Only start drag after threshold to allow normal clicks
+    if (!movedRef.current && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+    movedRef.current = true;
+    isDraggingRef.current = true;
     e.preventDefault();
-    const dx = e.clientX - dragStartRef.current.x;
-    const dy = e.clientY - dragStartRef.current.y;
     setTransform((prev) => ({
       ...prev,
-      x: dragTransStartRef.current.x + dx,
-      y: dragTransStartRef.current.y + dy,
+      x: dragStartTransRef.current.x + dx,
+      y: dragStartTransRef.current.y + dy,
     }));
   }, []);
 
   const onMouseUp = useCallback(() => {
-    isDraggingRef.current = false;
+    mouseDownRef.current = false;
+    // Small delay to let click event fire first, then reset drag flag
+    requestAnimationFrame(() => {
+      isDraggingRef.current = false;
+    });
   }, []);
 
   // --- Button controls ---
@@ -169,6 +160,7 @@ export function useZoomPan() {
   return {
     transform,
     containerRef,
+    isDragging: isDraggingRef,
     isPinching: isPinchingRef,
     zoomIn,
     zoomOut,
