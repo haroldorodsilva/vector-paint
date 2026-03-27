@@ -11,6 +11,7 @@ import {
   FolderOpen,
   ImageOff,
   Loader2,
+  Search,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/useAuth';
@@ -30,7 +31,11 @@ import ConfirmModal from './ConfirmModal';
 
 type Tab = 'categories' | 'drawings';
 
-export default function AdminPanel() {
+interface AdminPanelProps {
+  onDataChanged?: () => void;
+}
+
+export default function AdminPanel({ onDataChanged }: AdminPanelProps) {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('categories');
@@ -70,6 +75,10 @@ export default function AdminPanel() {
 
   // Delete confirmation modal state
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; svgContent?: string } | null>(null);
+
+  // Drawings filter state
+  const [drawSearchQuery, setDrawSearchQuery] = useState('');
+  const [drawFilterCategoryId, setDrawFilterCategoryId] = useState<string>('');
 
   // -----------------------------------------------------------------------
   // Load data on mount
@@ -119,6 +128,7 @@ export default function AdminPanel() {
       setNewCatName('');
       setNewCatEmoji('📁');
       showCatSuccess('Categoria criada com sucesso!');
+      onDataChanged?.();
     } else {
       setCatsError('Erro ao criar categoria. Verifique se o Supabase está configurado.');
     }
@@ -143,6 +153,7 @@ export default function AdminPanel() {
       );
       setEditingCatId(null);
       showCatSuccess('Categoria atualizada!');
+      onDataChanged?.();
     } else {
       setCatsError('Erro ao atualizar categoria.');
     }
@@ -155,6 +166,7 @@ export default function AdminPanel() {
     if (ok) {
       setCategories((prev) => prev.filter((c) => c.id !== id));
       showCatSuccess('Categoria removida!');
+      onDataChanged?.();
     } else {
       setCatsError('Erro ao remover categoria.');
     }
@@ -192,6 +204,7 @@ export default function AdminPanel() {
       setNewDrawCategoryId('');
       setNewDrawSvg('');
       showDrawSuccess('Desenho adicionado com sucesso!');
+      onDataChanged?.();
     } else {
       setDrawsError('Erro ao adicionar desenho. Verifique se o Supabase está configurado.');
     }
@@ -216,6 +229,7 @@ export default function AdminPanel() {
       );
       setEditingDrawId(null);
       showDrawSuccess('Desenho atualizado!');
+      onDataChanged?.();
     } else {
       setDrawsError('Erro ao atualizar desenho.');
     }
@@ -232,6 +246,7 @@ export default function AdminPanel() {
     if (ok) {
       setDrawings((prev) => prev.filter((d) => d.id !== deleteTarget.id));
       showDrawSuccess('Desenho removido!');
+      onDataChanged?.();
     } else {
       setDrawsError('Erro ao remover desenho.');
     }
@@ -497,23 +512,57 @@ export default function AdminPanel() {
               </p>
             )}
 
+            {/* Search & filter */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por nome…"
+                  value={drawSearchQuery}
+                  onChange={(e) => setDrawSearchQuery(e.target.value)}
+                  className="w-full rounded-xl border border-gray-300 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+              </div>
+              <select
+                value={drawFilterCategoryId}
+                onChange={(e) => setDrawFilterCategoryId(e.target.value)}
+                className="rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+              >
+                <option value="">Todas as categorias</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.emoji} {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Drawing list */}
+            {(() => {
+              const query = drawSearchQuery.trim().toLowerCase();
+              const filteredDrawings = drawings.filter((d) => {
+                const matchesName = !query || d.name.toLowerCase().includes(query);
+                const matchesCat = !drawFilterCategoryId || d.categoryId === drawFilterCategoryId;
+                return matchesName && matchesCat;
+              });
+              return (
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
               <div className="px-5 py-3 border-b border-gray-100 text-sm font-bold text-gray-600">
-                Desenhos ({drawings.length})
+                Desenhos ({filteredDrawings.length}{filteredDrawings.length !== drawings.length ? ` de ${drawings.length}` : ''})
               </div>
               {drawsLoading ? (
                 <div className="flex items-center justify-center py-10 text-gray-400">
                   <Loader2 size={24} className="animate-spin mr-2" /> Carregando…
                 </div>
-              ) : drawings.length === 0 ? (
+              ) : filteredDrawings.length === 0 ? (
                 <div className="flex flex-col items-center py-10 text-gray-400 gap-1">
                   <ImageOff size={32} />
-                  <p className="text-sm">Nenhum desenho</p>
+                  <p className="text-sm">{drawings.length === 0 ? 'Nenhum desenho' : 'Nenhum desenho encontrado'}</p>
                 </div>
               ) : (
                 <ul className="divide-y divide-gray-100">
-                  {drawings.map((drawing) => {
+                  {filteredDrawings.map((drawing) => {
                     const cat = categories.find((c) => c.id === drawing.categoryId);
                     return editingDrawId === drawing.id ? (
                       <li key={drawing.id} className="flex items-center gap-3 px-5 py-3 bg-purple-50">
@@ -578,6 +627,8 @@ export default function AdminPanel() {
                 </ul>
               )}
             </div>
+              );
+            })()}
           </div>
         )}
       </div>

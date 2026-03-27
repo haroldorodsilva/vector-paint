@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import type { Category, Drawing } from './lib/types';
 import { useStorage } from './lib/storage';
@@ -39,10 +39,14 @@ export default function App() {
   const [remoteCategories, setRemoteCategories] = useState<Category[]>([]);
   const [remoteDrawings, setRemoteDrawings] = useState<Drawing[]>([]);
 
-  useEffect(() => {
+  const refreshRemoteData = useCallback(() => {
     fetchCategories().then((cats) => setRemoteCategories(cats));
     fetchDrawings().then((draws) => setRemoteDrawings(draws));
   }, []);
+
+  useEffect(() => {
+    refreshRemoteData();
+  }, [refreshRemoteData]);
 
   const localCategories = ensureDefaultCategory(rawCategories);
 
@@ -161,14 +165,14 @@ export default function App() {
             />
           }
         />
-        <Route path="/admin" element={<AdminRoute />} />
+        <Route path="/admin" element={<AdminRoute onDataChanged={refreshRemoteData} />} />
       </Routes>
     </>
   );
 }
 
 /** Renders AdminLogin or AdminPanel based on auth state */
-function AdminRoute() {
+function AdminRoute({ onDataChanged }: { onDataChanged: () => void }) {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -179,7 +183,7 @@ function AdminRoute() {
     );
   }
 
-  return user ? <AdminPanel /> : <AdminLogin />;
+  return user ? <AdminPanel onDataChanged={onDataChanged} /> : <AdminLogin />;
 }
 
 /** Resolves drawingId from URL params and renders PaintingScreen */

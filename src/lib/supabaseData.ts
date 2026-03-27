@@ -94,7 +94,7 @@ export async function fetchDrawings(): Promise<Drawing[]> {
   const { data, error } = await supabase
     .from('drawings')
     .select('*')
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: false });
   if (error || !data) return [];
   return (data as DbDrawing[]).map(mapDrawing);
 }

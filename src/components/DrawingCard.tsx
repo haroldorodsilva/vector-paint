@@ -80,14 +80,14 @@ export default function DrawingCard({
           <span className="text-xs font-semibold text-gray-700 truncate max-w-full">
             {drawing.name}
           </span>
-          <div className="flex items-center gap-1">
-            <span className="inline-flex items-center gap-0.5 text-[10px] bg-purple-100 text-purple-700 rounded-full px-1.5 py-0.5">
-              <span>{categoryEmoji}</span>
-              <span>{categoryName}</span>
+          <div className="flex items-center gap-1 flex-wrap justify-center">
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-purple-100 text-purple-700 rounded-full px-2 py-0.5 shadow-sm">
+              <span className="text-sm leading-none">{categoryEmoji}</span>
+              <span className="truncate max-w-[80px]">{categoryName}</span>
             </span>
             {drawing.isBuiltIn && (
               <span
-                className="inline-flex items-center bg-amber-100 text-amber-600 rounded-full px-1 py-0.5"
+                className="inline-flex items-center gap-0.5 bg-amber-50 text-amber-600 rounded-full px-1.5 py-0.5 shadow-sm border border-amber-200"
                 title="Desenho pré-carregado"
               >
                 <Star size={10} fill="currentColor" />

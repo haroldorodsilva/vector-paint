@@ -27,7 +27,8 @@ export default function DrawingGallery({
 
   const isSupabaseConfigured = supabase !== null;
 
-  const filtered = filterByCategory(drawings, selectedCategory);
+  const filtered = filterByCategory(drawings, selectedCategory)
+    .sort((a, b) => b.createdAt - a.createdAt);
 
   function getCategoryInfo(categoryId: string) {
     const cat = categories.find((c) => c.id === categoryId);
