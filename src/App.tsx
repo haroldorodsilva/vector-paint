@@ -13,8 +13,6 @@ import {
 import {
   getAllDrawings,
   addDrawing,
-  updateDrawing,
-  deleteDrawing,
 } from './lib/drawings';
 import { fetchCategories, fetchDrawings } from './lib/supabaseData';
 import { useAuth } from './lib/useAuth';
@@ -48,22 +46,33 @@ export default function App() {
 
   const localCategories = ensureDefaultCategory(rawCategories);
 
-  // Merge local + remote categories, avoiding duplicates by id
+  // Merge local + remote categories, avoiding duplicates by id or isDefault flag
   const categories: Category[] = [
     ...localCategories,
     ...remoteCategories.filter(
-      (rc) => !localCategories.some((lc) => lc.id === rc.id),
+      (rc) =>
+        !localCategories.some(
+          (lc) => lc.id === rc.id || (lc.isDefault && rc.isDefault),
+        ),
     ),
   ];
+
+  // Find the Supabase default category UUID so we can normalize drawing categoryIds
+  const remoteDefaultId = remoteCategories.find((c) => c.isDefault)?.id;
 
   const localAllDrawings = getAllDrawings(userDrawings);
 
   // Merge local built-in/user drawings + remote drawings, avoiding duplicates
+  // Normalize remote default category UUID → local 'default' id
   const allDrawings: Drawing[] = [
     ...localAllDrawings,
-    ...remoteDrawings.filter(
-      (rd) => !localAllDrawings.some((ld) => ld.id === rd.id),
-    ),
+    ...remoteDrawings
+      .map((rd) =>
+        remoteDefaultId && rd.categoryId === remoteDefaultId
+          ? { ...rd, categoryId: 'default' }
+          : rd,
+      )
+      .filter((rd) => !localAllDrawings.some((ld) => ld.id === rd.id)),
   ];
 
   const navigate = useNavigate();
@@ -89,14 +98,6 @@ export default function App() {
   function handleAddDrawing(name: string, categoryId: string, svgContent: string) {
     saveDrawings(addDrawing(userDrawings, name, categoryId, svgContent));
     navigate('/');
-  }
-
-  function handleUpdateDrawing(id: string, name: string, categoryId: string) {
-    saveDrawings(updateDrawing(userDrawings, id, name, categoryId));
-  }
-
-  function handleDeleteDrawing(id: string) {
-    saveDrawings(deleteDrawing(userDrawings, id));
   }
 
   // --- Navigation ---
@@ -126,8 +127,6 @@ export default function App() {
               onGoToCategories={() => navigate('/categorias')}
               onGoToUpload={() => navigate('/upload')}
               onGoToAdmin={() => navigate('/admin')}
-              onDeleteDrawing={handleDeleteDrawing}
-              onUpdateDrawing={handleUpdateDrawing}
             />
           }
         />

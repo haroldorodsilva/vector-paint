@@ -13,8 +13,6 @@ interface DrawingGalleryProps {
   onGoToCategories: () => void;
   onGoToUpload: () => void;
   onGoToAdmin: () => void;
-  onDeleteDrawing: (id: string) => void;
-  onUpdateDrawing: (id: string, name: string, categoryId: string) => void;
 }
 
 export default function DrawingGallery({
@@ -24,13 +22,8 @@ export default function DrawingGallery({
   onGoToCategories,
   onGoToUpload,
   onGoToAdmin,
-  onDeleteDrawing,
-  onUpdateDrawing,
 }: DrawingGalleryProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editCategoryId, setEditCategoryId] = useState('');
 
   const isSupabaseConfigured = supabase !== null;
 
@@ -39,31 +32,6 @@ export default function DrawingGallery({
   function getCategoryInfo(categoryId: string) {
     const cat = categories.find((c) => c.id === categoryId);
     return { name: cat?.name ?? 'Sem Categoria', emoji: cat?.emoji ?? '' };
-  }
-
-  function handleStartEdit(drawing: Drawing) {
-    setEditingId(drawing.id);
-    setEditName(drawing.name);
-    setEditCategoryId(drawing.categoryId);
-  }
-
-  function handleCancelEdit() {
-    setEditingId(null);
-    setEditName('');
-    setEditCategoryId('');
-  }
-
-  function handleSaveEdit() {
-    if (editingId && editName.trim()) {
-      onUpdateDrawing(editingId, editName.trim(), editCategoryId);
-      handleCancelEdit();
-    }
-  }
-
-  function handleDelete(drawing: Drawing) {
-    if (window.confirm(`Tem certeza que deseja remover "${drawing.name}"?`)) {
-      onDeleteDrawing(drawing.id);
-    }
   }
 
   return (
@@ -125,59 +93,14 @@ export default function DrawingGallery({
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
           {filtered.map((drawing) => {
             const { name: catName, emoji: catEmoji } = getCategoryInfo(drawing.categoryId);
-            const isEditing = editingId === drawing.id;
 
-            return isEditing ? (
-              <div key={drawing.id} className="flex flex-col rounded-xl bg-white shadow-md border-2 border-purple-300 p-2 gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500">
-                  Nome
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="mt-0.5 w-full rounded-lg border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400"
-                  />
-                </label>
-                <label className="text-[10px] font-semibold text-gray-500">
-                  Categoria
-                  <select
-                    value={editCategoryId}
-                    onChange={(e) => setEditCategoryId(e.target.value)}
-                    className="mt-0.5 w-full rounded-lg border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400"
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <div className="flex gap-1.5 mt-0.5">
-                  <button
-                    type="button"
-                    onClick={handleSaveEdit}
-                    className="flex-1 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1 transition-colors cursor-pointer"
-                  >
-                    Salvar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    className="flex-1 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold py-1 transition-colors cursor-pointer"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            ) : (
+            return (
               <DrawingCard
                 key={drawing.id}
                 drawing={drawing}
                 categoryName={catName}
                 categoryEmoji={catEmoji}
                 onClick={() => onSelectDrawing(drawing)}
-                onEdit={!drawing.isBuiltIn ? () => handleStartEdit(drawing) : undefined}
-                onDelete={!drawing.isBuiltIn ? () => handleDelete(drawing) : undefined}
               />
             );
           })}

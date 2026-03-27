@@ -25,6 +25,8 @@ import {
   deleteDrawingFromDb,
 } from '../lib/supabaseData';
 import type { Category, Drawing } from '../lib/types';
+import EmojiPicker from './EmojiPicker';
+import ConfirmModal from './ConfirmModal';
 
 type Tab = 'categories' | 'drawings';
 
@@ -65,6 +67,9 @@ export default function AdminPanel() {
   const [editingDrawId, setEditingDrawId] = useState<string | null>(null);
   const [editDrawName, setEditDrawName] = useState('');
   const [editDrawCategoryId, setEditDrawCategoryId] = useState('');
+
+  // Delete confirmation modal state
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; svgContent?: string } | null>(null);
 
   // -----------------------------------------------------------------------
   // Load data on mount
@@ -216,16 +221,21 @@ export default function AdminPanel() {
     }
   }
 
-  async function handleDeleteDrawing(id: string, name: string) {
-    if (!window.confirm(`Remover o desenho "${name}"?`)) return;
+  function requestDeleteDrawing(drawing: Drawing) {
+    setDeleteTarget({ id: drawing.id, name: drawing.name, svgContent: drawing.svgContent });
+  }
+
+  async function confirmDeleteDrawing() {
+    if (!deleteTarget) return;
     setDrawsError(null);
-    const ok = await deleteDrawingFromDb(id);
+    const ok = await deleteDrawingFromDb(deleteTarget.id);
     if (ok) {
-      setDrawings((prev) => prev.filter((d) => d.id !== id));
+      setDrawings((prev) => prev.filter((d) => d.id !== deleteTarget.id));
       showDrawSuccess('Desenho removido!');
     } else {
       setDrawsError('Erro ao remover desenho.');
     }
+    setDeleteTarget(null);
   }
 
   // -----------------------------------------------------------------------
@@ -305,13 +315,10 @@ export default function AdminPanel() {
                   required
                   className="flex-1 rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                 />
-                <input
-                  type="text"
-                  placeholder="Emoji (📁)"
+                <EmojiPicker
                   value={newCatEmoji}
-                  onChange={(e) => setNewCatEmoji(e.target.value)}
-                  maxLength={4}
-                  className="w-24 rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  onChange={setNewCatEmoji}
+                  className="w-24"
                 />
                 <button
                   type="submit"
@@ -355,12 +362,10 @@ export default function AdminPanel() {
                   {categories.map((cat) =>
                     editingCatId === cat.id ? (
                       <li key={cat.id} className="flex items-center gap-3 px-5 py-3 bg-purple-50">
-                        <input
-                          type="text"
+                        <EmojiPicker
                           value={editCatEmoji}
-                          onChange={(e) => setEditCatEmoji(e.target.value)}
-                          maxLength={4}
-                          className="w-14 rounded-lg border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                          onChange={setEditCatEmoji}
+                          className="w-14"
                         />
                         <input
                           type="text"
@@ -464,6 +469,19 @@ export default function AdminPanel() {
                     Adicionar
                   </button>
                 </div>
+
+                {/* SVG preview */}
+                {newDrawSvg && (
+                  <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+                    <p className="text-xs font-semibold text-gray-500 mb-2">Pré-visualização</p>
+                    <div className="mx-auto w-40 h-40 bg-white rounded-lg border border-gray-100 flex items-center justify-center overflow-hidden">
+                      <div
+                        className="w-36 h-36 [&>svg]:w-full [&>svg]:h-full"
+                        dangerouslySetInnerHTML={{ __html: newDrawSvg }}
+                      />
+                    </div>
+                  </div>
+                )}
               </form>
             </div>
 
@@ -548,7 +566,7 @@ export default function AdminPanel() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDeleteDrawing(drawing.id, drawing.name)}
+                            onClick={() => requestDeleteDrawing(drawing)}
                             className="text-red-400 hover:text-red-600 cursor-pointer"
                           >
                             <Trash2 size={14} />
@@ -563,6 +581,17 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
+
+      {/* Delete confirmation modal */}
+      <ConfirmModal
+        open={deleteTarget !== null}
+        title="Remover Desenho"
+        message={`Tem certeza que deseja remover "${deleteTarget?.name ?? ''}"? Essa ação não pode ser desfeita.`}
+        confirmLabel="Remover"
+        svgPreview={deleteTarget?.svgContent}
+        onConfirm={confirmDeleteDrawing}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

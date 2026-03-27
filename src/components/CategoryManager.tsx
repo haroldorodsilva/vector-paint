@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, FolderOpen, Plus, Pencil, Trash2, Save, X } from 'lucide-react';
 import type { Category } from '../lib/types';
+import EmojiPicker from './EmojiPicker';
 
 interface CategoryManagerProps {
   categories: Category[];
@@ -85,15 +86,14 @@ export default function CategoryManager({
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-purple-400"
           />
         </label>
-        <label className="w-20 text-sm font-semibold text-gray-600">
+        <div className="w-20 text-sm font-semibold text-gray-600">
           Emoji
-          <input
-            type="text"
+          <EmojiPicker
             value={newEmoji}
-            onChange={(e) => setNewEmoji(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-base text-center focus:outline-none focus:ring-2 focus:ring-purple-400"
+            onChange={setNewEmoji}
+            className="mt-1"
           />
-        </label>
+        </div>
         <button
           type="button"
           onClick={handleCreate}
@@ -123,15 +123,14 @@ export default function CategoryManager({
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-purple-400"
                   />
                 </label>
-                <label className="w-20 text-sm font-semibold text-gray-600">
+                <div className="w-20 text-sm font-semibold text-gray-600">
                   Emoji
-                  <input
-                    type="text"
+                  <EmojiPicker
                     value={editEmoji}
-                    onChange={(e) => setEditEmoji(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-base text-center focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    onChange={setEditEmoji}
+                    className="mt-1"
                   />
-                </label>
+                </div>
                 <div className="flex gap-2">
                   <button
                     type="button"
