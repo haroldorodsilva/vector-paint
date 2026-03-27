@@ -59,6 +59,12 @@ export default function DrawingCard({
 
   return (
     <div className="relative group">
+      {/* Category badge — top-right overlay */}
+      <span className="absolute top-1.5 right-1.5 z-10 inline-flex items-center gap-0.5 text-[10px] font-semibold bg-white/90 backdrop-blur-sm text-purple-700 rounded-lg px-1.5 py-0.5 shadow border border-purple-200/60 pointer-events-none">
+        <span className="text-xs leading-none">{categoryEmoji}</span>
+        <span className="truncate max-w-[60px]">{categoryName}</span>
+      </span>
+
       <button
         type="button"
         onClick={onClick}
@@ -76,30 +82,24 @@ export default function DrawingCard({
         />
 
         {/* Info area */}
-        <div className="w-full px-2 py-1.5 flex flex-col items-center gap-0.5">
+        <div className="w-full px-2 py-1.5 flex items-center justify-center gap-1">
           <span className="text-xs font-semibold text-gray-700 truncate max-w-full">
             {drawing.name}
           </span>
-          <div className="flex items-center gap-1 flex-wrap justify-center">
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-purple-100 text-purple-700 rounded-full px-2 py-0.5 shadow-sm">
-              <span className="text-sm leading-none">{categoryEmoji}</span>
-              <span className="truncate max-w-[80px]">{categoryName}</span>
+          {drawing.isBuiltIn && (
+            <span
+              className="inline-flex items-center bg-amber-50 text-amber-600 rounded-full p-0.5 shadow-sm border border-amber-200 shrink-0"
+              title="Desenho pré-carregado"
+            >
+              <Star size={9} fill="currentColor" />
             </span>
-            {drawing.isBuiltIn && (
-              <span
-                className="inline-flex items-center gap-0.5 bg-amber-50 text-amber-600 rounded-full px-1.5 py-0.5 shadow-sm border border-amber-200"
-                title="Desenho pré-carregado"
-              >
-                <Star size={10} fill="currentColor" />
-              </span>
-            )}
-          </div>
+          )}
         </div>
       </button>
 
       {/* Edit/Delete overlay */}
       {!drawing.isBuiltIn && (onEdit || onDelete) && (
-        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+        <div className="absolute top-1 left-1 z-20 flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
           {onEdit && (
             <button
               type="button"
