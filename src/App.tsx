@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
-import type { Drawing } from './lib/types';
+import type { Category, Drawing } from './lib/types';
 import { useStorage } from './lib/storage';
 import {
   ensureDefaultCategory,
@@ -15,10 +16,14 @@ import {
   updateDrawing,
   deleteDrawing,
 } from './lib/drawings';
+import { fetchCategories, fetchDrawings } from './lib/supabaseData';
+import { useAuth } from './lib/useAuth';
 import DrawingGallery from './components/DrawingGallery';
 import PaintingScreen from './components/PaintingScreen';
 import CategoryManager from './components/CategoryManager';
 import SVGUploader from './components/SVGUploader';
+import AdminLogin from './components/AdminLogin';
+import AdminPanel from './components/AdminPanel';
 
 export default function App() {
   const {
@@ -32,8 +37,34 @@ export default function App() {
     save: saveDrawings,
   } = useStorage<Drawing[]>('drawings', []);
 
-  const categories = ensureDefaultCategory(rawCategories);
-  const allDrawings = getAllDrawings(userDrawings);
+  // Supabase remote data (merged into local data for the gallery)
+  const [remoteCategories, setRemoteCategories] = useState<Category[]>([]);
+  const [remoteDrawings, setRemoteDrawings] = useState<Drawing[]>([]);
+
+  useEffect(() => {
+    fetchCategories().then((cats) => setRemoteCategories(cats));
+    fetchDrawings().then((draws) => setRemoteDrawings(draws));
+  }, []);
+
+  const localCategories = ensureDefaultCategory(rawCategories);
+
+  // Merge local + remote categories, avoiding duplicates by id
+  const categories: Category[] = [
+    ...localCategories,
+    ...remoteCategories.filter(
+      (rc) => !localCategories.some((lc) => lc.id === rc.id),
+    ),
+  ];
+
+  const localAllDrawings = getAllDrawings(userDrawings);
+
+  // Merge local built-in/user drawings + remote drawings, avoiding duplicates
+  const allDrawings: Drawing[] = [
+    ...localAllDrawings,
+    ...remoteDrawings.filter(
+      (rd) => !localAllDrawings.some((ld) => ld.id === rd.id),
+    ),
+  ];
 
   const navigate = useNavigate();
 
@@ -130,9 +161,25 @@ export default function App() {
             />
           }
         />
+        <Route path="/admin" element={<AdminRoute />} />
       </Routes>
     </>
   );
+}
+
+/** Renders AdminLogin or AdminPanel based on auth state */
+function AdminRoute() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-blue-50">
+        <p className="text-gray-500 text-sm">Carregando…</p>
+      </div>
+    );
+  }
+
+  return user ? <AdminPanel /> : <AdminLogin />;
 }
 
 /** Resolves drawingId from URL params and renders PaintingScreen */
