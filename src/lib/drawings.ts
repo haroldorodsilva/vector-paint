@@ -1,7 +1,7 @@
 import type { Drawing } from './types';
 
 // Auto-load SVGs from src/assets/drawings/
-const svgAssets = import.meta.glob('../../assets/drawings/*.svg', {
+const svgAssets = import.meta.glob('../assets/drawings/*.svg', {
   query: '?raw',
   import: 'default',
   eager: true,
