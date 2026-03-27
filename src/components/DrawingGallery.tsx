@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Palette, Upload, FolderOpen, ImageOff } from 'lucide-react';
+import { Palette, Upload, FolderOpen, ImageOff, Settings } from 'lucide-react';
 import type { Category, Drawing } from '../lib/types';
 import { filterByCategory } from '../lib/drawings';
+import { supabase } from '../lib/supabase';
 import CategoryFilter from './CategoryFilter';
 import DrawingCard from './DrawingCard';
 
@@ -11,6 +12,7 @@ interface DrawingGalleryProps {
   onSelectDrawing: (drawing: Drawing) => void;
   onGoToCategories: () => void;
   onGoToUpload: () => void;
+  onGoToAdmin: () => void;
   onDeleteDrawing: (id: string) => void;
   onUpdateDrawing: (id: string, name: string, categoryId: string) => void;
 }
@@ -21,6 +23,7 @@ export default function DrawingGallery({
   onSelectDrawing,
   onGoToCategories,
   onGoToUpload,
+  onGoToAdmin,
   onDeleteDrawing,
   onUpdateDrawing,
 }: DrawingGalleryProps) {
@@ -28,6 +31,8 @@ export default function DrawingGallery({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editCategoryId, setEditCategoryId] = useState('');
+
+  const isSupabaseConfigured = supabase !== null;
 
   const filtered = filterByCategory(drawings, selectedCategory);
 
@@ -69,21 +74,33 @@ export default function DrawingGallery({
           <Palette size={24} /> Galeria de Desenhos
         </h1>
         <div className="flex gap-2">
+          {!isSupabaseConfigured && (
+            <>
+              <button
+                type="button"
+                onClick={onGoToUpload}
+                className="flex items-center gap-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white px-3 min-h-[40px] text-sm font-semibold transition-colors cursor-pointer"
+              >
+                <Upload size={14} />
+                <span>Upload SVG</span>
+              </button>
+              <button
+                type="button"
+                onClick={onGoToCategories}
+                className="flex items-center gap-1.5 rounded-full bg-blue-500 hover:bg-blue-600 text-white px-3 min-h-[40px] text-sm font-semibold transition-colors cursor-pointer"
+              >
+                <FolderOpen size={14} />
+                <span>Categorias</span>
+              </button>
+            </>
+          )}
           <button
             type="button"
-            onClick={onGoToUpload}
-            className="flex items-center gap-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white px-3 min-h-[40px] text-sm font-semibold transition-colors cursor-pointer"
+            onClick={onGoToAdmin}
+            className="flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 w-10 min-h-[40px] transition-colors cursor-pointer"
+            title="Painel administrativo"
           >
-            <Upload size={14} />
-            <span>Upload SVG</span>
-          </button>
-          <button
-            type="button"
-            onClick={onGoToCategories}
-            className="flex items-center gap-1.5 rounded-full bg-blue-500 hover:bg-blue-600 text-white px-3 min-h-[40px] text-sm font-semibold transition-colors cursor-pointer"
-          >
-            <FolderOpen size={14} />
-            <span>Categorias</span>
+            <Settings size={16} />
           </button>
         </div>
       </div>

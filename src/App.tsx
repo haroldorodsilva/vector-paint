@@ -125,6 +125,7 @@ export default function App() {
               onSelectDrawing={handleSelectDrawing}
               onGoToCategories={() => navigate('/categorias')}
               onGoToUpload={() => navigate('/upload')}
+              onGoToAdmin={() => navigate('/admin')}
               onDeleteDrawing={handleDeleteDrawing}
               onUpdateDrawing={handleUpdateDrawing}
             />
