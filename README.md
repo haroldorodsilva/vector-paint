@@ -32,7 +32,7 @@ Crie um projeto em [supabase.com](https://supabase.com) e execute o schema SQL e
 
 ### 2. Configurar variáveis de ambiente
 
-Copie `.env.example` para `.env.local` e preencha com suas credenciais:
+**Desenvolvimento local** — Copie `.env.example` para `.env.local` e preencha com suas credenciais:
 
 ```bash
 cp .env.example .env.local
@@ -42,6 +42,16 @@ cp .env.example .env.local
 VITE_SUPABASE_URL=https://xxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
 ```
+
+**Deploy no GitHub Pages** — As variáveis precisam ser cadastradas como *Secrets* no repositório, pois o arquivo `.env.local` não é enviado para o Git. Siga os passos:
+
+1. No GitHub, acesse **Settings → Secrets and variables → Actions** do repositório.
+2. Clique em **New repository secret** e cadastre as duas variáveis:
+   - `VITE_SUPABASE_URL` — URL do projeto Supabase (ex: `https://xxxx.supabase.co`)
+   - `VITE_SUPABASE_ANON_KEY` — chave pública `anon` do projeto
+3. O workflow `deploy.yml` já está configurado para injetar esses secrets automaticamente no build.
+
+> **Atenção:** a `ANON_KEY` é segura para expor no frontend — ela é pública por design e protegida pelas políticas RLS do Supabase.
 
 ### 3. Criar usuário admin
 
